@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wedding of Romeo & Juliet</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden;
+        }
+        h1, h2, .font-script {
+            font-family: 'Great Vibes', cursive;
+        }
+        .cover-bg {
+            background-image: url('https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+        .pattern-bg {
+            background-color: #fdf2f8;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23fbcfe8' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        /* Animasi */
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: floating 3s ease-in-out infinite;
+        }
+        #main-content {
+            display: none; 
+        }
+        /* Music Button Animation */
+        .music-btn {
+            animation: spin 4s linear infinite;
+        }
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+        .paused {
+            animation-play-state: paused;
+        }
+        /* Sembunyikan Player YouTube secara visual */
+        #youtube-player {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-700">
+
+    <!-- COVER SCREEN -->
+    <div id="cover" class="fixed inset-0 z-50 flex flex-col items-center justify-center min-h-screen text-center text-white cover-bg bg-black/50 bg-blend-overlay transition-opacity duration-1000">
+        <div class="p-6 space-y-6">
+            <h3 class="text-lg tracking-widest uppercase mb-2">The Wedding Of</h3>
+            <h1 class="text-6xl font-script mb-4 text-pink-200">Romeo & Juliet</h1>
+            
+            <div class="mt-8 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/30">
+                <p class="text-sm mb-2">Kepada Yth. Bapak/Ibu/Saudara/i</p>
+                <div class="text-xl font-bold mb-2">Tamu Undangan</div>
+                <p class="text-xs italic text-gray-200">Mohon maaf apabila ada kesalahan penulisan nama/gelar</p>
+            </div>
+
+            <button id="btn-open" class="mt-8 px-8 py-3 bg-pink-600 hover:bg-pink-700 text-white rounded-full shadow-lg transition transform hover:scale-105 flex items-center justify-center gap-2 mx-auto animate-float cursor-pointer">
+                <i class="fas fa-envelope-open"></i> Buka Undangan
+            </button>
+            <p id="loading-text" class="text-xs mt-2 text-pink-200 hidden">Memuat Musik...</p>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main-content" class="pattern-bg relative">
+
+        <!-- MUSIC CONTROLLER -->
+        <div class="fixed top-4 right-4 z-40">
+            <button onclick="toggleMusic()" class="w-10 h-10 bg-white/80 backdrop-blur rounded-full shadow-lg text-pink-600 flex items-center justify-center border border-pink-200">
+                <i id="music-icon" class="fas fa-compact-disc music-btn"></i>
+            </button>
+        </div>
+        
+        <!-- ELEMENT YOUTUBE (Akan diinject oleh API) -->
+        <div id="youtube-player"></div>
+
+        <!-- HEADER / HERO -->
+        <header class="min-h-screen flex flex-col items-center justify-center text-center p-6 relative bg-white">
+            <div class="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
+                <img src="https://www.svgrepo.com/show/486245/flower-1.svg" class="absolute top-0 left-0 w-48 -translate-x-10 -translate-y-10" alt="Decoration">
+                <img src="https://www.svgrepo.com/show/486245/flower-1.svg" class="absolute bottom-0 right-0 w-48 translate-x-10 translate-y-10 rotate-180" alt="Decoration">
+            </div>
+
+            <p class="text-pink-600 tracking-widest uppercase text-sm mb-4">We Are Getting Married</p>
+            <h1 class="text-5xl md:text-7xl font-script text-gray-800 mb-6">Romeo & Juliet</h1>
+            <p class="text-lg text-gray-600 mb-8">Minggu, 17 Agustus 2025</p>
+            
+            <!-- Countdown -->
+            <div class="flex gap-4 justify-center mb-8">
+                <div class="bg-pink-600 text-white p-3 rounded-lg w-16">
+                    <span id="days" class="block text-xl font-bold">00</span>
+                    <span class="text-xs">Hari</span>
+                </div>
+                <div class="bg-pink-600 text-white p-3 rounded-lg w-16">
+                    <span id="hours" class="block text-xl font-bold">00</span>
+                    <span class="text-xs">Jam</span>
+                </div>
+                <div class="bg-pink-600 text-white p-3 rounded-lg w-16">
+                    <span id="minutes" class="block text-xl font-bold">00</span>
+                    <span class="text-xs">Menit</span>
+                </div>
+                <div class="bg-pink-600 text-white p-3 rounded-lg w-16">
+                    <span id="seconds" class="block text-xl font-bold">00</span>
+                    <span class="text-xs">Detik</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MEMPELAI / COUPLE -->
+        <section class="py-16 px-6 text-center max-w-4xl mx-auto">
+            <img src="https://www.svgrepo.com/show/530573/wedding-rings.svg" alt="Rings" class="w-16 h-16 mx-auto mb-6 opacity-50">
+            <p class="italic text-gray-600 mb-8">"Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri..."</p>
+            
+            <div class="grid md:grid-cols-2 gap-12 items-center mt-12">
+                <!-- Groom -->
+                <div class="flex flex-col items-center">
+                    <div class="w-48 h-48 rounded-full overflow-hidden border-4 border-pink-200 shadow-xl mb-4">
+                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Groom" class="w-full h-full object-cover">
+                    </div>
+                    <h2 class="text-4xl font-script text-pink-600 mb-2">Romeo Montague</h2>
+                    <p class="text-gray-600 font-bold">Putra Pertama</p>
+                    <p class="text-gray-500 text-sm">Bpk. Montague & Ibu Lady Montague</p>
+                </div>
+
+                <div class="md:hidden text-4xl font-script text-gray-300">&</div>
+
+                <!-- Bride -->
+                <div class="flex flex-col items-center">
+                    <div class="w-48 h-48 rounded-full overflow-hidden border-4 border-pink-200 shadow-xl mb-4">
+                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Bride" class="w-full h-full object-cover">
+                    </div>
+                    <h2 class="text-4xl font-script text-pink-600 mb-2">Juliet Capulet</h2>
+                    <p class="text-gray-600 font-bold">Putri Kedua</p>
+                    <p class="text-gray-500 text-sm">Bpk. Capulet & Ibu Lady Capulet</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ACARA / EVENT -->
+        <section class="py-16 bg-white rounded-t-[3rem] shadow-inner text-center">
+            <div class="max-w-4xl mx-auto px-6">
+                <h2 class="text-4xl font-script text-pink-600 mb-10">Rangkaian Acara</h2>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Akad -->
+                    <div class="bg-pink-50 p-8 rounded-2xl border border-pink-100 shadow-sm hover:shadow-md transition">
+                        <div class="text-4xl mb-4">💍</div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Akad Nikah</h3>
+                        <p class="text-gray-600 font-semibold mb-1">Minggu, 17 Agustus 2025</p>
+                        <p class="text-gray-500 mb-4">Pukul 08.00 WIB - Selesai</p>
+                    </div>
+
+                    <!-- Resepsi -->
+                    <div class="bg-pink-50 p-8 rounded-2xl border border-pink-100 shadow-sm hover:shadow-md transition">
+                        <div class="text-4xl mb-4">🥂</div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Resepsi</h3>
+                        <p class="text-gray-600 font-semibold mb-1">Minggu, 17 Agustus 2025</p>
+                        <p class="text-gray-500 mb-4">Pukul 11.00 WIB - 14.00 WIB</p>
+                    </div>
+                </div>
+
+                <div class="mt-10">
+                    <a href="https://goo.gl/maps" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 text-white rounded-full hover:bg-gray-700 transition">
+                        <i class="fas fa-map-marked-alt"></i> Lihat Lokasi Google Maps
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="bg-gray-900 text-gray-400 py-8 text-center text-sm">
+            <h2 class="text-2xl font-script text-gray-200 mb-2">Romeo & Juliet</h2>
+            <p>&copy; 2025 All Rights Reserved.</p>
+        </footer>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // ==========================================
+        //  KONFIGURASI MUSIK YOUTUBE
+        // ==========================================
+        
+        // ID Video dari link: https://youtu.be/eZ4rchqg7ag
+        const youtubeVideoId = 'eZ4rchqg7ag'; 
+        
+        // Dimulai dari detik ke-0 (awal)
+        const startTime = 0; 
+
+        // ==========================================
+        
+        var player;
+        var isMusicPlaying = false;
+
+        // 1. MEMUAT API YOUTUBE
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        // 2. SETUP PLAYER
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                height: '0',
+                width: '0',
+                videoId: youtubeVideoId,
+                playerVars: {
+                    'autoplay': 0, // Autoplay diset 0, dipicu manual via tombol
+                    'controls': 0,
+                    'showinfo': 0,
+                    'loop': 1,
+                    'start': startTime,
+                    'playsinline': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            // Player siap, tombol aktif
+            const btnOpen = document.getElementById('btn-open');
+            btnOpen.addEventListener('click', function() {
+                openInvitation();
+            });
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                player.seekTo(startTime);
+                player.playVideo();
+            }
+        }
+
+        // 3. LOGIKA BUKA UNDANGAN & PLAY MUSIK
+        function openInvitation() {
+            const cover = document.getElementById('cover');
+            const content = document.getElementById('main-content');
+            
+            // Play Musik
+            if(player && typeof player.playVideo === 'function') {
+                player.seekTo(startTime);
+                player.playVideo();
+                isMusicPlaying = true;
+                player.setVolume(100);
+            }
+
+            // Animasi Buka
+            cover.style.opacity = '0';
+            setTimeout(() => {
+                cover.style.display = 'none';
+                content.style.display = 'block';
+            }, 1000);
+        }
+
+        // 4. CONTROLLER MUSIK
+        function toggleMusic() {
+            const icon = document.getElementById('music-icon');
+            
+            if (isMusicPlaying) {
+                player.pauseVideo();
+                icon.classList.add('paused');
+                isMusicPlaying = false;
+            } else {
+                player.playVideo();
+                icon.classList.remove('paused');
+                isMusicPlaying = true;
+            }
+        }
+
+        // 5. COUNTDOWN
+        const weddingDate = new Date("2025-08-17T08:00:00").getTime();
+        const timer = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = weddingDate - now;
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            document.getElementById("days").innerText = days;
+            document.getElementById("hours").innerText = hours;
+            document.getElementById("minutes").innerText = minutes;
+            document.getElementById("seconds").innerText = seconds;
+            if (distance < 0) {
+                clearInterval(timer);
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
